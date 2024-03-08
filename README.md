@@ -30,4 +30,3 @@ We work with the following columns:
   * In App Purchases
   * Editors Choice
 ***
-# Dashboard
