@@ -1,7 +1,6 @@
 import configparser
 import pymysql
 import pandas as pd
-from ETL_csv import max_installs
 
 def create_connection():
     config = configparser.ConfigParser()
