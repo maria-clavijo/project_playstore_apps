@@ -55,9 +55,9 @@ def insert_data(conn, df):
                     row["Minimum Android"], row["Released"], row["Last Updated"], row["Content Rating"], row["Rating"], row["Minimum Installs"], row["Maximum Installs"])
             cursor.execute(query, data)
         conn.commit()
-        print("Datos insertados exitosamente")
+        print("Data successfully inserted")
     except pymysql.Error as error:
-        print("Error al insertar los datos:", error)
+        print("Error when inserting data:", error)
         conn.rollback()
     finally:
         cursor.close()
