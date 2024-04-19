@@ -59,15 +59,15 @@ host = localhost
 user = your_user
 password = your_password
 ```
-## Data:
+### Data:
 Place the Google-Playstore-Dataset-Clean.csv file in a data subfolder within the main project directory.
 
 ### Running the Scripts:
 1. ETL_csv.py: This script is responsible for creating the database and the main table, as well as loading the data from the CSV file.
-Run the script with the command: python ETL_csv.py
+   Run the script with the command: ```python ETL_csv.py```
 
-2. ModelDimensional.py: This script creates the dimensional tables and a fact table, performing data transformations as necessary.
-Run the script with the command: python ModelDimensional.py
+3. ModelDimensional.py: This script creates the dimensional tables and a fact table, performing data transformations as necessary.
+   Run the script with the command: ```python ModelDimensional.py```
 
 Additional Notes:
 Ensure the scripts are executed in the given order to avoid database-related errors.
