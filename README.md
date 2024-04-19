@@ -8,7 +8,8 @@ Data Analysis and Ratings Prediction for Apps on Google Play Store
 # Tecnologys
   - Python
   - Jupiter Notebook
-  - Data Base (PostgreSQL)
+  - Data Base (MySQL)
+  - API
   - PowerBI
 ***
 # About Data
@@ -29,4 +30,8 @@ We work with the following columns:
   * Ad Supported
   * In App Purchases
   * Editors Choice
+***
+# Api
+google-play-scraper es una API para rastrear fácilmente la Google Play Store usando Python, sin dependencias externas. Esta API permite obtener detalles de las aplicaciones, buscar aplicaciones por términos específicos, entre otros.
+
 ***
