@@ -34,10 +34,6 @@ The dataset contains 23 attributes, making it ideal for comprehensive data analy
 - In App Purchases
 - Editors Choice
 
-## API
-
-The `google-play-scraper` is an API for easily scraping the Google Play Store using Python, with no external dependencies. This API allows for retrieving app details, searching for apps by specific terms, and more.
-
 ## Installation
 
 ### Prerequisites:
