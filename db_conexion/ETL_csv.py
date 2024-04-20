@@ -38,8 +38,7 @@ def create_db(conn):
         rating FLOAT NOT NULL,
         minimum_installs INT NOT NULL,
         maximum_installs VARCHAR(255) NULL
-    );
-    """)
+    ); """)
     conn.commit()
     cursor.close()
 
