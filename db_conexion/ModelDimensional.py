@@ -116,14 +116,11 @@ def query_db(conn):
 def transform_dm_tables(data):
     transformed_data = []
     for index, row in data.iterrows():
-        # Extraer año, mes y día de la columna Released
-        released_date = pd.to_datetime(row['released'])  # Asegurarse de que es un tipo datetime
+        released_date = pd.to_datetime(row['released']) 
         released_year = released_date.year
         released_month = released_date.month
         released_day = released_date.day
-        
-        # Extraer año, mes y día de la columna Last Updated
-        updated_date = pd.to_datetime(row['last_updated'])  # Asegurarse de que es un tipo datetime
+        updated_date = pd.to_datetime(row['last_updated']) 
         updated_year = updated_date.year
         updated_month = updated_date.month
         updated_day = updated_date.day
@@ -149,7 +146,6 @@ def transform_fact_table(data):
     transformed_data = []
     for index, row in data.iterrows():
         installs = int(row['installs'].replace('+', '').replace(',', ''))
-        # Asumiendo que 'maximum_installs' es un campo que ya existe en el DataFrame
         maximum_installs = row['maximum_installs']
 
         transformed_row = {
@@ -161,8 +157,8 @@ def transform_fact_table(data):
             'maximum_installs': maximum_installs,
             'size': row['size'],
             'minimum_android': row['minimum_android'],
-            'released': row['released'],  # Dejar la fecha original para la tabla de hechos
-            'last_updated': row['last_updated'],  # Dejar la fecha original para la tabla de hechos
+            'released': row['released'], 
+            'last_updated': row['last_updated'], 
             'content_rating': row['content_rating']
         }
         transformed_data.append(transformed_row)
@@ -282,8 +278,6 @@ def foreign_keys(conn):
 
 def main():
     conn = create_connection()
-    
-    # Crear tablas dimensionales y tabla de hechos si no existen
     create_dim_tables(conn)
     create_fact_table(conn)
     

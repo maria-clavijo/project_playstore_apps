@@ -1,3 +1,6 @@
 venv
 db_config.json
 /db_conexion/config.ini
+/plugins/
+/logs/
+/config/
