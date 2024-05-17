@@ -46,13 +46,17 @@ def create_db(conn):
 def insert_data(conn, df):
     cursor = conn.cursor()
     query = """
-    INSERT INTO googleplaystore (app_name, category, installs, size, minimum_android, released, last_updated, content_rating, rating, minimum_installs, maximum_installs)
+    INSERT INTO googleplaystore (
+    app_name, category, installs, size, minimum_android, released, 
+    last_updated, content_rating, rating, minimum_installs, maximum_installs)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     try:
         for index, row in df.iterrows():
             data = (row["App Name"], row["Category"], row["Installs"], row["Size"],
-                    row["Minimum Android"], row["Released"], row["Last Updated"], row["Content Rating"], row["Rating"], row["Minimum Installs"], row["Maximum Installs"])
+                    row["Minimum Android"], row["Released"], row["Last Updated"], 
+                    row["Content Rating"], row["Rating"], row["Minimum Installs"], 
+                    row["Maximum Installs"])
             cursor.execute(query, data)
         conn.commit()
         print("Data successfully inserted")

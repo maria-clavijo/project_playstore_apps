@@ -1,20 +1,19 @@
 import pandas as pd
 import logging
 import json
-from loadb import create_api_db, use_api_db, insert_data_api
+from loadb import use_api, insert_data_api
 
 def extract_api():
     logging.info("Loading data from MySQL database...")
-    data_api = use_api_db()
+    data_api = use_api()
     logging.info("Data loaded successfully.")
     return data_api
 
 def ma_installs(value):
     if isinstance(value, int):
         return value
-
     if isinstance(value, str):
-        value = value.strip()
+        value = value.strip().replace(',', '')
         if value.endswith('+'):
             value = value[:-1]
 
@@ -26,25 +25,10 @@ def ma_installs(value):
             return int(float(value[:-1]) * 1000000000)
     return int(value)
 
-def ren_col_api(df):
-    column_names = {
-        'title': 'app_name',
-        'installs': 'installs',
-        'minInstalls': 'minimum_installs',
-        'realInstalls': 'maximum_installs',
-        'score': 'score',
-        'rating': 'views',
-        'genre': 'category',
-        'contentRating': 'content_rating',
-        'released': 'released',
-        'lastUpdatedOn': 'last_updated'}
-    df.rename(columns=column_names, inplace=True)
-    df.columns = [col.lower() for col in df.columns]
-    return df[['app_name', 'installs', 'minimum_installs','maximum_installs', 'score', 'views', 'category', 'content_rating', 'released', 'last_updated']]
-
-def transform_api(**kwargs):
-    ti = kwargs["ti"]
-    apps_df = ti.xcom_pull(task_ids="load_api")
+def transform_api(df):
+    #ti = kwargs["ti"]
+    #apps_df = ti.xcom_pull(task_ids="extract_api")
+    apps_df = df
     logging.info("Starting cleaning and transformation processes...")
     df = pd.DataFrame(apps_df)
 
@@ -56,24 +40,31 @@ def transform_api(**kwargs):
     df['minInstalls'].fillna(0, inplace=True)
     df['realInstalls'] = df['realInstalls'].apply(ma_installs)
     df['realInstalls'].fillna(0, inplace=True)
+    df['free'] = df['free'].map({True: 1, False: 0})
     df['title'].str.match(r'^[a-zA-Z0-9]+$')
     df['title'].fillna('NaN', inplace=True)
     logging.info("Deleted unnecessary columns.")
-
-    df1 = ren_col_api(df)
-    logging.info("Rename columns.")
-
-    df1.drop_duplicates(inplace=True)
-    logging.info("Removed duplicates.")
+    df.isna().all(axis=1)
+    df.drop_duplicates(inplace=True)
+    logging.info("Removed duplicates and null.")
     logging.info("Cleaning and transformation processes completed.")
-    return df1.to_json(orient='records')
+    return df.to_json(orient='records')
 
-def load_api(**kwargs):
+def load_api(df):
     logging.info("Starting data loading process...")
-    create_api_db()
-
-    ti = kwargs["ti"]
-    apps_api_df = pd.json_normalize(json.loads(ti.xcom_pull(task_ids="transform_api")))
-
+    #ti = kwargs["ti"]
+    #apps_api_df = pd.json_normalize(json.loads(ti.xcom_pull(task_ids="transform_api")))
+    apps_api_df = df
     insert_data_api(apps_api_df)
     logging.info("Loading completed")
+    logging.info("The api_googleplaystore table has been successfully created in googleplaystoredb database.")
+
+
+#def main():
+#    df_apps = extract_api()
+#    df_transformed = transform_api(df_apps)
+#    load_api(df_transformed)
+#    print('The "api_googleplaystore" table has been successfully created in "googleplaystoredb" database.')
+
+#if __name__ == "__main__":
+#    main()

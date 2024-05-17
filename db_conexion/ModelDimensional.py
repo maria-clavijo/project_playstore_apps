@@ -98,19 +98,17 @@ def create_fact_table(conn):
 #        if connection:
 #            connection.close()
 
-def query_db(conn):
-    try:
-        cursor = conn.cursor()
-        cursor.execute("USE googleplaystoredb")
-        query = """
-                SELECT * FROM googleplaystore
-        """
-        cursor.execute(query)
-        df = pd.read_sql_query(query, conn)
+def query_db():
+    connection = create_connection()
+    if connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM googleplaystore")
+        rows = cursor.fetchall()
+        columns = [col[0] for col in cursor.description]
+        df = pd.DataFrame(rows, columns=columns)
+        cursor.close()
+        connection.close()
         return df
-    except pymysql.Error as e:
-        print("Error al extraer datos:", e)
-        return None
 
 ################################################
 def transform_dm_tables(data):
@@ -281,9 +279,7 @@ def main():
     create_dim_tables(conn)
     create_fact_table(conn)
     
-    df_apps = query_db(conn)
-    
-    # Transformar datos
+    df_apps = query_db()
     df_transformed_dims = transform_dm_tables(df_apps)
     df_transformed_fact = transform_fact_table(df_apps)
     

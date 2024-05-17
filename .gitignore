@@ -1,6 +1,8 @@
-venv
 db_config.json
 /db_conexion/config.ini
 /plugins/
 /logs/
 /config/
+/venv
+/Airflow/__pycache__
+/db_conexion/db_settings.json
