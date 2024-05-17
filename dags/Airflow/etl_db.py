@@ -8,6 +8,12 @@ def extract_db():
     logging.info("Data loaded successfully.")
     return data_db
 
+def extract_api():
+    logging.info("Loading data api from MySQL database...")
+    data_api = query_api_db()
+    logging.info("Data api loaded successfully.")
+    return data_api
+
 def m_installs(value):
     if isinstance(value, int):
         return value
@@ -121,7 +127,7 @@ def load_new(df):
 #    df_merged = merge(df_apps, api_df)
 #    df_transformed = transform_db(df_merged)
 #    load_new(df_transformed)
-#    #print('The "new_googleplaystore" table has been successfully created in "googleplaystoredb" database.')
+#    print('The "new_googleplaystore" table has been successfully created in "googleplaystoredb" database.')
 #    print(df_transformed)
 
 #if __name__ == "__main__":
