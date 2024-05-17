@@ -25,10 +25,10 @@ def ma_installs(value):
             return int(float(value[:-1]) * 1000000000)
     return int(value)
 
-def transform_api(df):
-    #ti = kwargs["ti"]
-    #apps_df = ti.xcom_pull(task_ids="extract_api")
-    apps_df = df
+def transform_api(**kwargs):
+    ti = kwargs["ti"]
+    apps_df = ti.xcom_pull(task_ids="extract_api")
+    #apps_df = df
     logging.info("Starting cleaning and transformation processes...")
     df = pd.DataFrame(apps_df)
 
@@ -50,15 +50,14 @@ def transform_api(df):
     logging.info("Cleaning and transformation processes completed.")
     return df.to_json(orient='records')
 
-def load_api(df):
+def load_api(**kwargs):
     logging.info("Starting data loading process...")
-    #ti = kwargs["ti"]
-    #apps_api_df = pd.json_normalize(json.loads(ti.xcom_pull(task_ids="transform_api")))
-    apps_api_df = df
+    ti = kwargs["ti"]
+    apps_api_df = pd.json_normalize(json.loads(ti.xcom_pull(task_ids="transform_api")))
+    #apps_api_df = df
     insert_data_api(apps_api_df)
     logging.info("Loading completed")
     logging.info("The api_googleplaystore table has been successfully created in googleplaystoredb database.")
-
 
 #def main():
 #    df_apps = extract_api()

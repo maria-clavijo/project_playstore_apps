@@ -5,9 +5,9 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models.baseoperator import chain
 sys.path.append(os.path.abspath("/opt/airflow/dags/Airflow"))
-from Airflow.dags.T_Api import extract_api, transform_api, load_api
-from Airflow.dags.T_db import extract_db, transform_db, load_db
-from Airflow.dags.merge import merge,load_merge
+from etl_api import extract_api, transform_api, load_api
+from etl_db import extract_db, extract_api_query, transform_db, merge, load_new
+
 
 
 default_args = {
@@ -21,9 +21,8 @@ default_args = {
     'retry_delay': timedelta(minutes=1)
 }
 
-
 with DAG(
-    'proyect_dag',
+    'proyect_google_dag',
     default_args=default_args,
     description='Our first DAG with ETL process!',
     schedule_interval='@daily',
@@ -61,7 +60,7 @@ with DAG(
 
     load_db = PythonOperator(
         task_id ='load',
-        python_callable = load_db,
+        python_callable = load_new,
         provide_context = True,
     )
 
@@ -71,6 +70,12 @@ with DAG(
         provide_context = True,
     )
 
+    extract_api_query = PythonOperator(
+        task_id ='extract_api_query',
+        python_callable = extract_api_query,
+        provide_context = True,
+    )
 
-    read_api >> transform_api >> merge >> load_api
-    read_db >> transform_db >> merge >> load_db
+    read_api >> transform_api >> load_api
+    extract_api_query >> merge
+    read_db >> merge >> transform_db >> load_new

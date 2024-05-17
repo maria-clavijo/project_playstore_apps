@@ -1,4 +1,4 @@
-pandas==2.2.1
-matplotlib
-numpy
-mysql-connector-python
+pandas==2.2.2
+matplotlib==3.8.4
+pymysql==1.1.0
+configparser==7.0.0

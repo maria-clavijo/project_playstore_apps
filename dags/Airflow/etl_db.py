@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 import logging
 from loadb import use_db, insert_data_merge_db, query_api_db
 
@@ -8,7 +9,7 @@ def extract_db():
     logging.info("Data loaded successfully.")
     return data_db
 
-def extract_api():
+def extract_api_query():
     logging.info("Loading data api from MySQL database...")
     data_api = query_api_db()
     logging.info("Data api loaded successfully.")
@@ -47,17 +48,17 @@ def ren_col_api(df):
     df.columns = [col.lower() for col in df.columns]
     return df[['app_name', 'installs', 'minimum_installs','maximum_installs', 'score', 'views', 'free', 'category', 'content_rating', 'released', 'last_updated']]
 
-def merge(db_df, api_df):
-    #ti = kwargs["ti"]
-    #db = json.loads(ti.xcom_pull(task_ids="transform_db"))
-    #db_df = pd.json_normalize(data=db)
+def merge(**kwargs):
+    ti = kwargs["ti"]
+    db = json.loads(ti.xcom_pull(task_ids="extract_db"))
+    db_df = pd.json_normalize(data=db)
 
-    #api = json.loads(ti.xcom_pull(task_ids="transform_api"))
-    #api_df = pd.json_normalize(data=api)
-    #logging.info("Data merging process started...")
+    api = json.loads(ti.xcom_pull(task_ids="extract_api_query"))
+    api_df = pd.json_normalize(data=api)
+    logging.info("Data merging process started...")
 
-    db_df = pd.read_json(db_df)
-    api_df = pd.read_json(api_df)
+    #db_df = pd.read_json(db_df)
+    #api_df = pd.read_json(api_df)
     df3 = ren_col_api(api_df)
 
     try:
@@ -69,10 +70,10 @@ def merge(db_df, api_df):
     except Exception as e:
         raise ValueError(f"Error merging data: {e}")
     
-def transform_db(json_data):
-    #ti = kwargs["ti"]
-    #json_data = ti.xcom_pull(task_ids="extract_db")
-    #logging.info("Starting cleaning and transformation processes...")
+def transform_db(**kwargs):
+    ti = kwargs["ti"]
+    json_data = ti.xcom_pull(task_ids="extract_db")
+    logging.info("Starting cleaning and transformation processes...")
     df1 = pd.read_json(json_data)
     df = pd.DataFrame(df1)
 
@@ -112,12 +113,12 @@ def transform_db(json_data):
     return df.to_json(orient='records')
 
 
-def load_new(df):
+def load_new(**kwargs):
     logging.info("Starting data loading process...")
        
-    #ti = kwargs["ti"]
-    #apps_api_df = pd.json_normalize(json.loads(ti.xcom_pull(task_ids="transform_db")))
-    apps_api_df = df
+    ti = kwargs["ti"]
+    apps_api_df = pd.json_normalize(json.loads(ti.xcom_pull(task_ids="transform_db")))
+    #apps_api_df = df
     insert_data_merge_db(apps_api_df)
     logging.info("The new_googleplaystore table has been successfully created in googleplaystoredb database.")
 
