@@ -217,7 +217,7 @@ def insert_data_api(json_api):
             logging.info("API data inserted successfully")
 
 def use_api():
-    df = pd.read_csv("./data/datos_api.csv")
+    df = pd.read_csv("../data/datos_api.csv")
     df_api = pd.DataFrame(df)
     return df_api
 
