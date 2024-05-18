@@ -3,8 +3,8 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models.baseoperator import chain
 
-from etl_api import extract_api, transform_api, load_api
-from etl_db import extract_db, extract_api_query, transform_db, merge, load_new
+from Airflow.etl_api import extract_api, transform_api, load_api
+from Airflow.etl_db import extract_db, extract_api_query, transform_db, merge, load_new
 
 default_args = {
     'owner': 'airflow',

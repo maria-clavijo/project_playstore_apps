@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import logging
-from loadb import use_db, insert_data_merge_db, query_api_db
+from Airflow.loadb import use_db, insert_data_merge_db, query_api_db
 
 def extract_db():
     logging.info("Loading data from MySQL database...")
