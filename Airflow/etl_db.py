@@ -1,19 +1,24 @@
 import pandas as pd
 import json
 import logging
-from Airflow.loadb import use_db, insert_data_merge_db, query_api_db
+from loadb import use_db, insert_data_merge_db, query_api_db
+
 
 def extract_db():
     logging.info("Loading data from MySQL database...")
     data_db = use_db()
     logging.info("Data loaded successfully.")
-    return data_db
+    data_db_json = data_db.to_json(orient='records')
+    return data_db_json
+
 
 def extract_api_query():
     logging.info("Loading data api from MySQL database...")
     data_api = query_api_db()
     logging.info("Data api loaded successfully.")
-    return data_api
+    data_api_json = data_api.to_json(orient='records')
+    return data_api_json
+
 
 def m_installs(value):
     if isinstance(value, int):
@@ -30,6 +35,7 @@ def m_installs(value):
         elif value[-1] in 'Bb':
             return int(float(value[:-1]) * 1000000000)
     return int(value)
+
 
 def ren_col_api(df):
     column_names = {
@@ -48,17 +54,16 @@ def ren_col_api(df):
     df.columns = [col.lower() for col in df.columns]
     return df[['app_name', 'installs', 'minimum_installs','maximum_installs', 'score', 'views', 'free', 'category', 'content_rating', 'released', 'last_updated']]
 
+
 def merge(**kwargs):
     ti = kwargs["ti"]
-    db = json.loads(ti.xcom_pull(task_ids="extract_db"))
-    db_df = pd.json_normalize(data=db)
+    data_db_json = ti.xcom_pull(task_ids="read_db")
+    db_df = pd.json_normalize(json.loads(data_db_json))
 
-    api = json.loads(ti.xcom_pull(task_ids="extract_api_query"))
-    api_df = pd.json_normalize(data=api)
+    data_api_json = ti.xcom_pull(task_ids="extract_api_query")
+    api_df = pd.json_normalize(json.loads(data_api_json))
     logging.info("Data merging process started...")
 
-    #db_df = pd.read_json(db_df)
-    #api_df = pd.read_json(api_df)
     df3 = ren_col_api(api_df)
 
     try:
@@ -70,12 +75,13 @@ def merge(**kwargs):
     except Exception as e:
         raise ValueError(f"Error merging data: {e}")
     
+
 def transform_db(**kwargs):
     ti = kwargs["ti"]
-    json_data = ti.xcom_pull(task_ids="extract_db")
+    json_data = ti.xcom_pull(task_ids="merge")
+    df = pd.json_normalize(json.loads(json_data))
+
     logging.info("Starting cleaning and transformation processes...")
-    df1 = pd.read_json(json_data)
-    df = pd.DataFrame(df1)
 
     df['released'] = pd.to_datetime(df['released'], unit='ms').dt.strftime('%Y-%m-%d')
     df['last_updated'] = pd.to_datetime(df['last_updated'], unit='ms').dt.strftime('%Y-%m-%d')
@@ -118,18 +124,5 @@ def load_new(**kwargs):
        
     ti = kwargs["ti"]
     apps_api_df = pd.json_normalize(json.loads(ti.xcom_pull(task_ids="transform_db")))
-    #apps_api_df = df
     insert_data_merge_db(apps_api_df)
     logging.info("The new_googleplaystore table has been successfully created in googleplaystoredb database.")
-
-#def main():
-#    df_apps = extract_db()
-#    api_df = query_api_db()
-#    df_merged = merge(df_apps, api_df)
-#    df_transformed = transform_db(df_merged)
-#    load_new(df_transformed)
-#    print('The "new_googleplaystore" table has been successfully created in "googleplaystoredb" database.')
-#    print(df_transformed)
-
-#if __name__ == "__main__":
-#    main()
