@@ -1,13 +1,16 @@
 import pandas as pd
 import logging
 import json
-from Airflow.loadb import use_api, insert_data_api
+from loadb import use_api, insert_data_api
+
 
 def extract_api():
-    logging.info("Loading data from MySQL database...")
+    logging.info("Loading data API...")
     data_api = use_api()
     logging.info("Data loaded successfully.")
-    return data_api
+    json_data = data_api.to_json(orient='records')
+    return json_data
+
 
 def ma_installs(value):
     if isinstance(value, int):
@@ -25,12 +28,15 @@ def ma_installs(value):
             return int(float(value[:-1]) * 1000000000)
     return int(value)
 
+
 def transform_api(**kwargs):
     ti = kwargs["ti"]
-    apps_df = ti.xcom_pull(task_ids="extract_api")
-    #apps_df = df
+    json_data = ti.xcom_pull(task_ids="read_api")
+
+    if json_data is None:
+        raise ValueError("No data available from extract_api task")
+    df = pd.json_normalize(json.loads(json_data))
     logging.info("Starting cleaning and transformation processes...")
-    df = pd.DataFrame(apps_df)
 
     df['released'] = pd.to_datetime(df['released'], format='%b %d, %Y').dt.strftime('%Y-%m-%d')
     df['lastUpdatedOn'] = pd.to_datetime(df['lastUpdatedOn'], format='%b %d, %Y').dt.strftime('%Y-%m-%d')
@@ -50,20 +56,16 @@ def transform_api(**kwargs):
     logging.info("Cleaning and transformation processes completed.")
     return df.to_json(orient='records')
 
+
 def load_api(**kwargs):
     logging.info("Starting data loading process...")
+
     ti = kwargs["ti"]
-    apps_api_df = pd.json_normalize(json.loads(ti.xcom_pull(task_ids="transform_api")))
-    #apps_api_df = df
-    insert_data_api(apps_api_df)
+    apps_api_json = ti.xcom_pull(task_ids="transform_api")
+
+    if apps_api_json is None:
+        raise ValueError("No data available from transform_api task")
+
+    insert_data_api(apps_api_json)
     logging.info("Loading completed")
     logging.info("The api_googleplaystore table has been successfully created in googleplaystoredb database.")
-
-#def main():
-#    df_apps = extract_api()
-#    df_transformed = transform_api(df_apps)
-#    load_api(df_transformed)
-#    print('The "api_googleplaystore" table has been successfully created in "googleplaystoredb" database.')
-
-#if __name__ == "__main__":
-#    main()
