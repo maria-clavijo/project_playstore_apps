@@ -6,7 +6,7 @@ import json
 logging.basicConfig(level=logging.INFO)
 
 def create_connection():
-    with open('./db_conexion/db_settings.json', 'r') as f:
+    with open('db_conexion/db_settings.json', 'r') as f:
         config = json.load(f)
 
     try:
@@ -25,6 +25,7 @@ def create_connection():
         print("Connection Error:", e)
         return None
 
+
 def use_db():
     connection = create_connection()
     if connection:
@@ -35,7 +36,8 @@ def use_db():
         df = pd.DataFrame(rows, columns=columns)
         cursor.close()
         connection.close()
-        return df.to_json(orient='records')
+        return df
+
 
 def create_merge_db():
     connection = create_connection()
@@ -59,6 +61,7 @@ def create_merge_db():
     cursor.close()
     connection.close()
   
+
 def insert_data_merge_db(json_data):
     connection = create_connection()
     if connection:
@@ -89,6 +92,7 @@ def insert_data_merge_db(json_data):
 
 ################################################################
 ################################################################
+
 def create_dw():
     connection = create_connection()
     if connection:
@@ -152,6 +156,7 @@ def create_dw():
         cursor.close()
         connection.close()
 
+
 def insert_dw(data, table):
     connection = create_connection()
     try:
@@ -172,6 +177,7 @@ def insert_dw(data, table):
 
 ################################################################
 ################################################################
+
 def create_api_db():
     connection = create_connection()
     cursor = connection.cursor()
@@ -195,6 +201,7 @@ def create_api_db():
     cursor.close()
     connection.close()
 
+
 def insert_data_api(json_api):
     connection = create_connection()
     with connection:
@@ -216,10 +223,12 @@ def insert_data_api(json_api):
             connection.commit()
             logging.info("API data inserted successfully")
 
+
 def use_api():
-    df = pd.read_csv("./data/datos_api.csv")
+    df = pd.read_csv("data/datos_api.csv")
     df_api = pd.DataFrame(df)
     return df_api
+
 
 def query_api_db():
     connection = create_connection()
@@ -231,9 +240,4 @@ def query_api_db():
         df = pd.DataFrame(rows, columns=columns)
         cursor.close()
         connection.close()
-        return df.to_json(orient='records')
-
-#create_api_db()
-#create_connection()
-#use_db()
-#create_db()
+        return df
