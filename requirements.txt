@@ -3,3 +3,4 @@ matplotlib==3.8.4
 pymysql==1.1.0
 configparser==7.0.0
 apache-airflow
+pyarrow==16.1.0
