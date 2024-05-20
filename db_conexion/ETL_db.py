@@ -4,7 +4,7 @@ import pandas as pd
 
 def create_connection():
     config = configparser.ConfigParser()
-    config.read('./db_conexion/config.ini')
+    config.read('config.ini')
     host = config['mysql']['host']
     user = config['mysql']['user']
     password = config['mysql']['password']
