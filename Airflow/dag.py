@@ -3,8 +3,9 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models.baseoperator import chain
 
-from Airflow.etl_api import extract_api, transform_api, load_api
-from Airflow.etl_db import extract_db, extract_api_query, transform_db, merge, load_new
+from etl_api import extract_api, transform_api, load_api
+from etl_db import extract_db, extract_api_query, transform_db, merge, load_new
+from kafka_streaming import stream_data
 
 default_args = {
     'owner': 'airflow',
@@ -72,6 +73,13 @@ with DAG(
         provide_context=True,
     )
 
+    task_kafka = PythonOperator(
+        task_id='stream_kafka_producer',
+        python_callable=stream_data,
+        provide_context=True,
+    )
+
+
     task_read_api >> task_transform_api >> task_load_api
     task_extract_api_query >> task_merge
-    task_read_db >> task_merge >> task_transform_db >> task_load_db
+    task_read_db >> task_merge >> task_transform_db >> task_load_db >> task_kafka
