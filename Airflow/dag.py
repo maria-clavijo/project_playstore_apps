@@ -5,7 +5,7 @@ from airflow.models.baseoperator import chain
 
 from etl_api import extract_api, transform_api, load_api
 from etl_db import extract_db, extract_api_query, transform_db, merge, load_new
-from kafka_streaming import stream_data
+import kafka_producer
 
 default_args = {
     'owner': 'airflow',
@@ -75,7 +75,7 @@ with DAG(
 
     task_kafka = PythonOperator(
         task_id='stream_kafka_producer',
-        python_callable=stream_data,
+        python_callable=kafka_producer,
         provide_context=True,
     )
 

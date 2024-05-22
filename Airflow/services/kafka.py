@@ -1,21 +1,23 @@
+from json import  dumps, loads
+import json
 from kafka import KafkaProducer, KafkaConsumer
-from json import dumps, loads
-import logging
 import pandas as pd
 import requests
+import logging
+from Airflow.loadb import insert_new_data
 
-
-def kafka_producer(data):
+def kafka_producer(row):
     producer = KafkaProducer(
-        value_serializer = lambda m: dumps(m).encode('utf-8'),
-        bootstrap_servers = ['localhost:9092']
+        value_serializer=lambda m: dumps(m).encode('utf-8'),
+        bootstrap_servers=['localhost:9092'],
     )
-    message = data.to_dict()
-    producer.send("kafka-playstore-apps", value=message)
-    logging.info("Message sent")
 
+    message = row.to_dict()
+    producer.send('kafka-playstore-apps', value=message)
+    print("Message sent")
 
 def kafka_consumer():
+    
     API_ENDPOINT = 'https://api.powerbi.com/beta/YOUR_POWERBI_WORKSPACE_ID/datasets/YOUR_DATASET_ID/rows?key=YOUR_API_KEY'
     
     consumer = KafkaConsumer(
@@ -23,21 +25,22 @@ def kafka_consumer():
         auto_offset_reset='earliest',
         enable_auto_commit=True,
         group_id='my-group-1',
-        value_deserializer=lambda m: loads(m.decode('utf-8')),
+        value_deserializer=lambda m: json.loads(m.decode('utf-8')),
         bootstrap_servers=['localhost:9092']
     )
 
     for message in consumer:
-        # Convert message to DataFrame
-        df = pd.json_normalize(message.value)
-        data = df.to_json(orient='records')
-        
-        # Send data to Power BI
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(API_ENDPOINT, headers=headers, data=data)
-        
-        if response.status_code == 200:
-            logging.info(f"Data sent to Power BI: {data}")
-        else:
-            logging.error(f"Failed to send data to Power BI: {response.status_code}, {response.text}")
+        df = pd.json_normalize(data=message.value)
+        if not df.empty:
+            first_record = df.iloc[0]
+            insert_new_data(first_record.to_dict())
+            logging.info("Data inserted into database MySQL:\n%s", df)
+            data = df.to_json(orient='records')
 
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(API_ENDPOINT, headers=headers, data=data)
+            
+            if response.status_code == 200:
+                logging.info(f"Data sent to Power BI: {data}")
+            else:
+                logging.error(f"Failed to send data to Power BI: {response.status_code}, {response.text}")

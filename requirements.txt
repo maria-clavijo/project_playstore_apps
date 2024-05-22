@@ -4,3 +4,5 @@ pymysql==1.1.0
 configparser==7.0.0
 apache-airflow
 pyarrow==16.1.0
+kafka-python==2.0.2
+scikit-learn==1.3.2

@@ -241,3 +241,45 @@ def query_api_db():
         cursor.close()
         connection.close()
         return df
+    
+def use_new_db():
+    connection = create_connection()
+    if connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM new_googleplaystore")
+        rows = cursor.fetchall()
+        columns = [col[0] for col in cursor.description]
+        df = pd.DataFrame(rows, columns=columns)
+        cursor.close()
+        connection.close()
+        return df
+    
+def insert_new_data(json_data):
+    connection = create_connection()
+    if connection:
+        cursor = connection.cursor()
+        insert_query = """
+        INSERT INTO new_googleplaystore (
+            app_name, installs, minimum_installs, maximum_installs, score, 
+            views, category, content_rating, released, last_updated)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        df = pd.DataFrame()
+        try:
+            if isinstance(json_data, str):
+                df = pd.read_json(json_data, orient='records')
+            elif isinstance(json_data, pd.DataFrame):
+                df = json_data
+            if not df.empty:
+                data_tuples = [tuple(row) for row in df.to_records(index=False)]
+                cursor.executemany(insert_query, data_tuples)
+                connection.commit()
+                logging.info("Data inserted successfully")
+            else:
+                logging.info("No data to insert, DataFrame is empty.")
+        except Exception as e:
+            logging.error(f"Error when inserting data: {e}")
+            connection.rollback()
+        finally:
+            cursor.close()
+            connection.close()

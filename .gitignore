@@ -2,7 +2,9 @@ db_config.json
 /db_conexion/config.ini
 /plugins/
 /logs/
-/config/
+/config
 /venv
 /Airflow/__pycache__
 /db_conexion/db_settings.json
+/.env
+/Airflow/services/__pycache__
