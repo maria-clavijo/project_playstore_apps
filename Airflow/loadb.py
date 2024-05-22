@@ -275,8 +275,6 @@ def insert_new_data(json_data):
                 cursor.executemany(insert_query, data_tuples)
                 connection.commit()
                 logging.info("Data inserted successfully")
-            else:
-                logging.info("No data to insert, DataFrame is empty.")
         except Exception as e:
             logging.error(f"Error when inserting data: {e}")
             connection.rollback()
