@@ -78,9 +78,9 @@ After installing Airflow, you must run the following command while in the reposi
 export AIRFLOW_HOME=$(pwd)
 ```
 
-You need to adjust the settings in the `airflow.cfg` file. In the `dags_folder` section, make sure to indicate the location of the DAGs. Change `dags` to `Airflow_ETL` to look like this:
+You need to adjust the settings in the `airflow.cfg` file. In the `dags_folder` section, make sure to indicate the location of the DAGs. Change `dags` to `Airflow` to look like this:
 ```
-dags_folder = /root/Workshop-2/Airflow_ETL
+dags_folder = /root/proyect_google_play/Airflow
 ```
 ### Step 7: Running the DAG in Airflow:
 Once you have set up Airflow and your DAGs are in the correct location, start Airflow using the following command from the repository root:
